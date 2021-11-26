@@ -12,11 +12,11 @@ No other requirements!
 
 #### Platforms
 JsonLW should work on any platform; it is only requirement is a C++20 compatible compiler,
-as it make heavy use of the C++20 move semantics, concepts and variadic templates.
+as it make heavy use of the C++ move semantics, concepts and variadic templates.
 
 One of the biggests goals for JsonLW is for it to be lightweight, and small.
 Having complicated logic isn't bad, but it bloats the codebase in most cases.
-I'd like to keep things small rather than put in big features that take a ton of space.
+I would like to keep things optimal by size rather than put in big features that take a more of space.
 
 
 ```cpp
@@ -40,7 +40,7 @@ int main()
     obj["array2"].append(false, "three");
     
     // We can also parse a string into a JSON object:
-    obj["parsed"] = json::json_t::load("[ { \"Key\" : \"Value\" }, false ]");
+    obj["parsed"] = json::json_t::load("[{\"Key\": \"Value\"}, false]");
     
     std::cout << obj << '\n';
 }
@@ -73,7 +73,7 @@ This example can also be written another way:
 int main()
 {
     json::json_t obj {
-        "array", json::json_t::array( true, "Two", 3, 4.0 ),
+        "array", json::json_t::array(true, "Two", 3, 4.0),
         "obj", {
             "inner", "Inside"
         },
@@ -90,8 +90,8 @@ int main()
     std::cout << obj << '\n';
 }
 ```
-Sadly, we do not have access to the ':' character in C++, so we cannot use that to seperate key-value pairs,
-but by using commas, we can achieve a very similar effect.
+We do not have access to the ':' character in C++, so we cannot use that to seperate key-value pairs,
+but by using commas, we can achieve a similar effect.
 The other point you might notice, is that we have to explictly create arrays.
 This is a limitation of C++'s operator overloading rules,
 so we cannot use the [] operator to define the array.
