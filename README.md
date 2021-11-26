@@ -27,20 +27,20 @@ int main()
     json::json_t obj;
 
     // Create a new Array as a field of an Object.
-    obj["array"] = json::json_t::array(true, "Two", 3, 4.0);
+    obj["array"] = json::array(true, "Two", 3, 4.0);
 
     // Create a new Object as a field of another Object.
-    obj["obj"] = json::json_t::object();
+    obj["obj"] = json::object();
     
     // Assign to one of the inner object's fields
     obj["obj"]["inner"] = "Inside";
     
-    // We don't need to specify the type of the JSON object:
+    // We don't need to specify the type of the Json object:
     obj["new"]["some"]["deep"]["key"] = "Value";
     obj["array2"].append(false, "three");
     
-    // We can also parse a string into a JSON object:
-    obj["parsed"] = json::json_t::load("[{\"Key\": \"Value\"}, false]");
+    // We can also parse a string into a Json object:
+    obj["parsed"] = json::load(R"([{"Key": "Value"}, false])");
     
     std::cout << obj << '\n';
 }
@@ -60,7 +60,9 @@ Output:
     "obj" : {
         "inner" : "Inside"
     },
-    "parsed" : [{ "Key" : "Value" }, false]
+    "parsed" : [{
+        "Key" : "Value"
+    }, false]
 }
 ```
 
@@ -73,7 +75,7 @@ This example can also be written another way:
 int main()
 {
     json::json_t obj {
-        "array", json::json_t::array(true, "Two", 3, 4.0),
+        "array", json::array(true, "Two", 3, 4.0),
         "obj", {
             "inner", "Inside"
         },
@@ -84,7 +86,7 @@ int main()
                 } 
             } 
         },
-        "array2", json::json_t::array(false, "three")
+        "array2", json::array(false, "three")
     };
 
     std::cout << obj << '\n';
