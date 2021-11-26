@@ -18,6 +18,7 @@ One of the biggests goals for JsonLW is for it to be lightweight, and small.
 Having complicated logic isn't bad, but it bloats the codebase in most cases.
 I would like to keep things optimal by size rather than put in big features that take a more of space.
 
+## Examples
 ```cpp
 #include "json.h"
 
