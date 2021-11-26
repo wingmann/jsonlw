@@ -554,7 +554,7 @@ namespace json
         class_t type_{class_t::null};
     };
 
-    json_t Array()
+    json_t array()
     {
         return std::move(json_t::make(json_t::class_t::array));
     }
