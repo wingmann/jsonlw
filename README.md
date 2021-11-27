@@ -4,7 +4,7 @@ Json library for modern C++
 ## About
 JsonLW is a lightweight Json library for exporting data in Json format from C++.
 By taking advantage of templates and operator overloading on the backend,
-you are able to create and work with JSON objects right away,
+you are able to create and work with Json objects right away,
 just as you would expect from a language such as JavaScript.
 JsonLW is a single C++ Header file, "json.h".
 Feel free to download this file on its own, and include it in your project.
