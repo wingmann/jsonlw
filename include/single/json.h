@@ -244,6 +244,33 @@ namespace json
             }
         }
 
+#if __cplusplus < 202002
+        template<typename T>
+        explicit json_t(T value, typename std::enable_if<std::is_same<T, bool>::value>::type* = nullptr)
+            : internal_{value}, type_{class_t::boolean}
+        {
+        }
+
+        template<typename T>
+        explicit json_t(
+            T value,
+            typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value>::type* = nullptr)
+            : internal_{static_cast<std::int64_t>(value)}, type_{class_t::integral}
+        {
+        }
+
+        template<typename T>
+        explicit json_t(T value, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr)
+            : internal_{static_cast<double>(value)}, type_{class_t::floating}
+        {
+        }
+
+        template<typename T>
+        explicit json_t(T value, typename std::enable_if<std::is_convertible<T, std::string>::value>::type* = nullptr)
+            : internal_{std::string{value}}, type_{class_t::string}
+        {
+        }
+#else
         template<typename T>
         requires std::is_same_v<T, bool>
         explicit json_t(T value, T* = nullptr) : internal_{value}, type_{class_t::boolean}
@@ -267,6 +294,7 @@ namespace json
         explicit json_t(T value, T* = nullptr) : internal_{std::string{value}}, type_{class_t::string}
         {
         }
+#endif
 
         explicit json_t(std::nullptr_t) : internal_{}, type_{class_t::null}
         {
@@ -295,6 +323,40 @@ namespace json
             append(args...);
         }
 
+#if __cplusplus < 202002
+        template<typename T>
+        typename std::enable_if<std::is_same<T, bool>::value, json_t&>::type operator=(T b)
+        {
+            set_type(class_t::boolean);
+            internal_.json_bool = b;
+            return *this;
+        }
+
+        template<typename T>
+        typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value, json_t&>::type
+        operator=(T i)
+        {
+            set_type(class_t::integral);
+            internal_.json_int = i;
+            return *this;
+        }
+
+        template<typename T>
+        typename std::enable_if<std::is_floating_point<T>::value, json_t&>::type operator=(T f)
+        {
+            set_type(class_t::floating);
+            internal_.json_float = f;
+            return *this;
+        }
+
+        template<typename T>
+        typename std::enable_if<std::is_convertible<T, std::string>::value, json_t&>::type operator=(T s)
+        {
+            set_type(class_t::string);
+            *internal_.json_string = std::string(s);
+            return *this;
+        }
+#else
         template<typename T>
         requires std::is_same_v<T, bool>
         json_t& operator=(T b)
@@ -330,6 +392,7 @@ namespace json
             *internal_.json_string = std::string(s);
             return *this;
         }
+#endif
 
         json_t& operator[](const std::string& key)
         {
