@@ -60,15 +60,15 @@ namespace json
 
             backing_data_t() = default;
 
-            explicit backing_data_t(double d) : json_float{d}
+            explicit backing_data_t(double value) : json_float{value}
             {
             }
 
-            explicit backing_data_t(std::int64_t i) : json_int{i}
+            explicit backing_data_t(std::int64_t value) : json_int{value}
             {
             }
 
-            explicit backing_data_t(bool b) : json_bool{b}
+            explicit backing_data_t(bool value) : json_bool{value}
             {
             }
 
@@ -96,32 +96,32 @@ namespace json
             container_t* object_;
 
         public:
-            explicit json_wrapper_t(container_t* val) : object_(val)
+            explicit json_wrapper_t(container_t* val) : object_{val}
             {
             }
 
-            explicit json_wrapper_t(std::nullptr_t) : object_(nullptr)
+            explicit json_wrapper_t(std::nullptr_t) : object_{nullptr}
             {
             }
 
             typename container_t::iterator begin()
             {
-                return object_ ? object_->begin() : typename container_t::iterator();
+                return object_ ? object_->begin() : typename container_t::iterator{};
             }
 
             typename container_t::iterator end()
             {
-                return object_ ? object_->end() : typename container_t::iterator();
+                return object_ ? object_->end() : typename container_t::iterator{};
             }
 
             [[nodiscard]] typename container_t::const_iterator begin() const
             {
-                return object_ ? object_->begin() : typename container_t::iterator();
+                return object_ ? object_->begin() : typename container_t::iterator{};
             }
 
             [[nodiscard]] typename container_t::const_iterator end() const
             {
-                return object_ ? object_->end() : typename container_t::iterator();
+                return object_ ? object_->end() : typename container_t::iterator{};
             }
         };
 
@@ -142,12 +142,12 @@ namespace json
 
             [[nodiscard]] typename container_t::const_iterator begin() const
             {
-                return object_ ? object_->begin() : typename container_t::const_iterator();
+                return object_ ? object_->begin() : typename container_t::const_iterator{};
             }
 
             [[nodiscard]] typename container_t::const_iterator end() const
             {
-                return object_ ? object_->end() : typename container_t::const_iterator();
+                return object_ ? object_->end() : typename container_t::const_iterator{};
             }
         };
 
@@ -155,14 +155,14 @@ namespace json
         {
         }
 
-        json_t(std::initializer_list<json_t> list) : json_t()
+        json_t(std::initializer_list<json_t> list) : json_t{}
         {
             set_type(class_t::object);
             for (auto i = list.begin(), e = list.end(); i != e; ++i, ++i)
                 operator[](i->to_string()) = *std::next(i);
         }
 
-        json_t(json_t&& other) noexcept : internal_(other.internal_), type_(other.type_)
+        json_t(json_t&& other) noexcept : internal_{other.internal_}, type_{other.type_}
         {
             other.type_ = class_t::null;
             other.internal_.json_map = nullptr;
@@ -353,7 +353,7 @@ namespace json
         typename std::enable_if<std::is_convertible<T, std::string>::value, json_t&>::type operator=(T s)
         {
             set_type(class_t::string);
-            *internal_.json_string = std::string(s);
+            *internal_.json_string = std::string{s};
             return *this;
         }
 #else
@@ -389,7 +389,7 @@ namespace json
         json_t& operator=(T s)
         {
             set_type(class_t::string);
-            *internal_.json_string = std::string(s);
+            *internal_.json_string = std::string{s};
             return *this;
         }
 #endif
@@ -506,28 +506,28 @@ namespace json
         auto object_range()
         {
             return (type_ == class_t::object) ? json_wrapper_t<types::map_t>{internal_.json_map}
-                                              : json_wrapper_t<types::map_t>(nullptr);
+                                              : json_wrapper_t<types::map_t>{nullptr};
         }
 
         auto array_range()
         {
-            return (type_ == class_t::array) ? json_wrapper_t<types::list_t>(internal_.json_list)
-                                             : json_wrapper_t<types::list_t>(nullptr);
+            return (type_ == class_t::array) ? json_wrapper_t<types::list_t>{internal_.json_list}
+                                             : json_wrapper_t<types::list_t>{nullptr};
         }
 
         [[nodiscard]] auto object_range() const
         {
-            return (type_ == class_t::object) ? json_const_wrapper_t<types::map_t>(internal_.json_map)
-                                              : json_const_wrapper_t<types::map_t>(nullptr);
+            return (type_ == class_t::object) ? json_const_wrapper_t<types::map_t>{internal_.json_map}
+                                              : json_const_wrapper_t<types::map_t>{nullptr};
         }
 
         [[nodiscard]] auto array_range() const
         {
-            return (type_ == class_t::array) ? json_const_wrapper_t<types::list_t>(internal_.json_list)
-                                             : json_const_wrapper_t<types::list_t>(nullptr);
+            return (type_ == class_t::array) ? json_const_wrapper_t<types::list_t>{internal_.json_list}
+                                             : json_const_wrapper_t<types::list_t>{nullptr};
         }
 
-        [[nodiscard]] std::string dump(int depth = 1, const std::string& tab = "  ") const
+        [[nodiscard]] std::string dump(int depth = 1, const std::string& tab = "    ") const
         {
             std::string pad;
             for (int i = 0; i < depth; ++i, pad += tab)
@@ -542,6 +542,7 @@ namespace json
             {
                 std::string s{"{\n"};
                 bool skip{true};
+                
                 for (auto& p : *internal_.json_map)
                 {
                     if (!skip)
@@ -842,7 +843,7 @@ namespace json
                         break;
                     }
                 }
-                exp = std::stol(exp_str);
+                exp = std::stoll(exp_str);
             }
             else if (!isspace(c) && c != ',' && c != ']' && c != '}')
             {
@@ -854,7 +855,7 @@ namespace json
             if (is_double)
                 number = std::stod(val) * std::pow(10, exp);
             else
-                number = (!exp_str.empty()) ? std::stol(val) * std::pow(10, exp) : std::stol(val);
+                number = (!exp_str.empty()) ? std::stoll(val) * std::pow(10, exp) : std::stoll(val);
             return std::move(number);
         }
 
@@ -883,6 +884,7 @@ namespace json
         json_t parse_null(const std::string& str, std::size_t& offset)
         {
             json_t json_null;
+
             if (str.substr(offset, 4) != "null")
             {
                 std::cerr << "ERROR: Null: Expected 'null', found '" << str.substr(offset, 4) << "'\n";
