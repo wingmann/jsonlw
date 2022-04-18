@@ -1,5 +1,5 @@
-#ifndef WINGMANN_JSON_H
-#define WINGMANN_JSON_H
+#ifndef WINGMANN_JSONLW_JSON_H
+#define WINGMANN_JSONLW_JSON_H
 
 #include "json_wrapper.h"
 #include "json_const_wrapper.h"
@@ -236,4 +236,4 @@ public:
 
 } // namespace wingmann
 
-#endif // WINGMANN_JSON_H
+#endif // WINGMANN_JSONLW_JSON_H
