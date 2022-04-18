@@ -64,7 +64,7 @@ Output:
         "inner" : "inside"
     },
     "parsed" : [{
-        "Key" : "value"
+        "key" : "value"
     }, false]
 }
 ```
