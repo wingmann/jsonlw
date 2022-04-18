@@ -32,7 +32,8 @@
 *.app
 
 # Folders
-.idea
-.vs
 build/
 out/
+.idea/
+.vs/
+lib/
