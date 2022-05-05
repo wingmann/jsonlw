@@ -177,7 +177,8 @@ json::size_type json::size() const
     switch (type_) {
     case class_type::object: return internal_.json_map->size();
     case class_type::array:  return internal_.json_list->size();
-    default:                 return std::numeric_limits<size_type>::max();
+    default:
+        return std::numeric_limits<size_type>::max();
     }
 }
 
@@ -311,7 +312,8 @@ json::string_type json::dump(int depth, const string_type& tab) const
     case class_type::floating: return std::to_string(internal_.json_float);
     case class_type::integral: return std::to_string(internal_.json_int);
     case class_type::boolean:  return internal_.json_bool ? "true" : "false";
-    default:                   return {};
+    default:
+        return {};
     }
 }
 
@@ -336,7 +338,7 @@ void json::set_type(json::class_type type)
     case class_type::array:    internal_.json_list   = new list_type{};   break;
     case class_type::string:   internal_.json_string = new string_type{}; break;
     case class_type::floating: internal_.json_float  = double{};          break;
-    case class_type::integral: internal_.json_int    = int_type{};    break;
+    case class_type::integral: internal_.json_int    = int_type{};        break;
     case class_type::boolean:  internal_.json_bool   = false;             break;
     }
     type_ = type;
@@ -348,7 +350,8 @@ void json::clear_internal()
     case class_type::object: delete internal_.json_map;    break;
     case class_type::array:  delete internal_.json_list;   break;
     case class_type::string: delete internal_.json_string; break;
-    default:                                               break;
+    default:
+        break;
     }
 }
 
@@ -376,7 +379,7 @@ json json::parse_next(const string_type& str, size_type& offset)
     case 'n':
         return std::move(parse_null(str, offset));
     default:
-        if ((value <= '9' && value >= '0') || value == '-')
+        if (((value <= '9') && (value >= '0')) || (value == '-'))
             return std::move(parse_number(str, offset));
         break;
     }
@@ -465,8 +468,7 @@ json json::parse_string(const string_type& str, size_type& offset)
 
     for (char c = str[++offset]; c != '\"'; c = str[++offset]) {
         if (c == '\\') {
-            switch (str[++offset])
-            {
+            switch (str[++offset]) {
             case '\"':    value += '\"';    break;
             case '\\':    value += '\\';    break;
             case '/':     value += '/';     break;
@@ -478,18 +480,19 @@ json json::parse_string(const string_type& str, size_type& offset)
             case 'u':
             {
                 value += "\\u";
+
                 for (unsigned i = 1; i <= 4; ++i) {
                     c = str[offset + i];
 
                     if ((c >= '0' && c <= '9') ||
-                        (c >= 'a' && c <= 'f') ||
-                        (c >= 'A' && c <= 'F'))
+                       (c >= 'a' && c <= 'f') ||
+                       (c >= 'A' && c <= 'F'))
                     {
                         value += c;
                     }
                     else {
-                        std::cerr << "ERROR: String: Expected hex character in unicode escape, found '" << c
-                                  << "'\n";
+                        std::cerr << "ERROR: String: Expected hex character in unicode escape, "
+                                  << "found '" << c << "'\n";
                         return std::move(json::make(json::class_type::string));
                     }
                 }
@@ -522,7 +525,7 @@ json json::parse_number(const string_type& str, size_type& offset)
     while (true) {
         c = str[offset++];
 
-        if ((c == '-') || (c >= '0' && c <= '9')) {
+        if ((c == '-') || ((c >= '0') && (c <= '9'))) {
             value += c;
         }
         else if (c == '.') {
@@ -544,10 +547,11 @@ json json::parse_number(const string_type& str, size_type& offset)
 
         while (true) {
             c = str[offset++];
+
             if (c >= '0' && c <= '9') {
                 expression_value += c;
             }
-            else if (!isspace(c) && c != ',' && c != ']' && c != '}') {
+            else if (!isspace(c) && (c != ',') && (c != ']') && (c != '}')) {
                 std::cerr << "ERROR: Number: Expected a number for exponent, found '" << c << "'\n";
                 return std::move(json::make(json::class_type::null));
             }
@@ -557,7 +561,7 @@ json json::parse_number(const string_type& str, size_type& offset)
         }
         exp = std::stoll(expression_value);
     }
-    else if (!isspace(c) && c != ',' && c != ']' && c != '}') {
+    else if (!isspace(c) && (c != ',') && (c != ']') && (c != '}')) {
         std::cerr << "ERROR: Number: unexpected character '" << c << "'\n";
         return std::move(json::make(json::class_type::null));
     }
