@@ -24,8 +24,7 @@ I would like to keep things optimal by size rather than put in big features that
 
 using namespace wingmann;
 
-int main()
-{
+int main() {
     json obj;
 
     // Create a new array as a field of an object.
@@ -77,8 +76,7 @@ This example can also be written another way:
 
 using namespace wingmann; 
 
-int main()
-{
+int main() {
     json obj {
         "array", json::array(true, "two", 3, 4.0),
         "obj", {
