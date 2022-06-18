@@ -107,7 +107,8 @@ public:
 
     template<typename T>
     typename std::enable_if<std::is_same<T, bool>::value, json&>::type
-    operator=(T b) {
+    operator=(T b)
+    {
         set_type(class_type::boolean);
         internal_.json_bool = b;
         return *this;
@@ -116,7 +117,8 @@ public:
     template<typename T>
     typename std::enable_if<std::is_integral<T>::value &&
                             !std::is_same<T, bool>::value, json&>::type
-    operator=(T i) {
+    operator=(T i)
+    {
         set_type(class_type::integral);
         internal_.json_int = i;
         return *this;
@@ -124,7 +126,8 @@ public:
 
     template<typename T>
     typename std::enable_if<std::is_floating_point<T>::value, json&>::type
-    operator=(T f) {
+    operator=(T f)
+    {
         set_type(class_type::floating);
         internal_.json_float = f;
         return *this;
@@ -132,7 +135,8 @@ public:
 
     template<typename T>
     typename std::enable_if<std::is_convertible<T, std::string>::value, json&>::type
-    operator=(T s) {
+    operator=(T s)
+    {
         set_type(class_type::string);
         *internal_.json_string = std::string{s};
         return *this;
@@ -146,13 +150,15 @@ public:
     json load(const std::string& value);
 
     template<typename T>
-    void append(T arg) {
+    void append(T arg)
+    {
         set_type(class_type::array);
         internal_.json_list->emplace_back(arg);
     }
 
     template<typename T, typename... U>
-    void append(T arg, U... args) {
+    void append(T arg, U... args)
+    {
         append(arg);
         append(args...);
     }
@@ -207,13 +213,15 @@ public:
     [[nodiscard]]
     std::string dump(int depth = 1, const std::string& tab = "    ") const;
 
-    friend std::ostream& operator<<(std::ostream& os, const json& value) {
+    friend std::ostream& operator<<(std::ostream& os, const json& value)
+    {
         os << value.dump();
         return os;
     }
 
     template<typename... T>
-    json array(T... args) {
+    json array(T... args)
+    {
         json arr = json::make(json::class_type::array);
         arr.append(args...);
         return std::move(arr);

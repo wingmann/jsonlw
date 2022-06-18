@@ -9,31 +9,39 @@ private:
     container_type* object_;
 
 public:
-    explicit json_wrapper(container_type* value) : object_{value} { }
+    explicit json_wrapper(container_type* value) : object_{value}
+    {
+    }
 
-    explicit json_wrapper(std::nullptr_t) : object_{nullptr} { }
+    explicit json_wrapper(std::nullptr_t) : object_{nullptr}
+    {
+    }
 
-    typename container_type::iterator begin() {
+    typename container_type::iterator begin()
+    {
         return object_
             ? object_->begin()
             : typename container_type::iterator{};
     }
 
-    typename container_type::iterator end() {
+    typename container_type::iterator end()
+    {
         return object_
             ? object_->end()
             : typename container_type::iterator{};
     }
 
     [[nodiscard]]
-    typename container_type::const_iterator begin() const {
+    typename container_type::const_iterator begin() const
+    {
         return object_
             ? object_->begin()
             : typename container_type::iterator{};
     }
 
     [[nodiscard]]
-    typename container_type::const_iterator end() const {
+    typename container_type::const_iterator end() const
+    {
         return object_
             ? object_->end()
             : typename container_type::iterator{};
