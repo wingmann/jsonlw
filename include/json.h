@@ -66,7 +66,8 @@ public:
 
     template<typename T>
     explicit json(T value, typename std::enable_if<std::is_same<T, bool>::value>::type* = nullptr)
-        : internal_{value}, type_{class_type::boolean}
+        : internal_{value},
+          type_{class_type::boolean}
     {
     }
 
@@ -74,8 +75,9 @@ public:
     explicit json(
         T value,
         typename std::enable_if<std::is_integral<T>::value &&
-            !std::is_same<T, bool>::value>::type* = nullptr)
-        : internal_{static_cast<std::int64_t>(value)}, type_{class_type::integral}
+                                !std::is_same<T, bool>::value>::type* = nullptr)
+        : internal_{static_cast<std::int64_t>(value)},
+          type_{class_type::integral}
     {
     }
 
@@ -83,7 +85,8 @@ public:
     explicit json(
         T value,
         typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr)
-        : internal_{static_cast<double>(value)}, type_{class_type::floating}
+        : internal_{static_cast<double>(value)},
+          type_{class_type::floating}
     {
     }
 
@@ -91,7 +94,8 @@ public:
     explicit json(
         T value,
         typename std::enable_if<std::is_convertible<T, std::string>::value>::type* = nullptr)
-        : internal_{std::string{value}}, type_{class_type::string}
+        : internal_{std::string{value}},
+          type_{class_type::string}
     {
     }
 
@@ -103,8 +107,7 @@ public:
 
     template<typename T>
     typename std::enable_if<std::is_same<T, bool>::value, json&>::type
-    operator=(T b)
-    {
+    operator=(T b) {
         set_type(class_type::boolean);
         internal_.json_bool = b;
         return *this;
@@ -113,8 +116,7 @@ public:
     template<typename T>
     typename std::enable_if<std::is_integral<T>::value &&
                             !std::is_same<T, bool>::value, json&>::type
-    operator=(T i)
-    {
+    operator=(T i) {
         set_type(class_type::integral);
         internal_.json_int = i;
         return *this;
@@ -122,8 +124,7 @@ public:
 
     template<typename T>
     typename std::enable_if<std::is_floating_point<T>::value, json&>::type
-    operator=(T f)
-    {
+    operator=(T f) {
         set_type(class_type::floating);
         internal_.json_float = f;
         return *this;
@@ -131,8 +132,7 @@ public:
 
     template<typename T>
     typename std::enable_if<std::is_convertible<T, std::string>::value, json&>::type
-    operator=(T s)
-    {
+    operator=(T s) {
         set_type(class_type::string);
         *internal_.json_string = std::string{s};
         return *this;
@@ -146,61 +146,74 @@ public:
     json load(const std::string& value);
 
     template<typename T>
-    void append(T arg)
-    {
+    void append(T arg) {
         set_type(class_type::array);
         internal_.json_list->emplace_back(arg);
     }
 
     template<typename T, typename... U>
-    void append(T arg, U... args)
-    {
+    void append(T arg, U... args) {
         append(arg);
         append(args...);
     }
 
+    [[nodiscard]]
+    const json& at(const std::string& key) const;
     json& at(const std::string& key);
-    [[nodiscard]] const json& at(const std::string& key) const;
+
+    [[nodiscard]]
+    const json& at(unsigned index) const;
     json& at(unsigned index);
-    [[nodiscard]] const json& at(unsigned index) const;
 
-    [[nodiscard]] size_type length() const;
-    [[nodiscard]] bool has_key(const std::string& key) const;
-    [[nodiscard]] size_type size() const;
-    [[nodiscard]] class_type json_type() const;
+    [[nodiscard]]
+    size_type length() const;
 
-    // Functions for getting primitives from the Json object.
-    [[nodiscard]] bool is_null() const;
+    [[nodiscard]]
+    bool has_key(const std::string& key) const;
 
-    [[nodiscard]] std::string to_string() const;
+    [[nodiscard]]
+    size_type size() const;
+
+    [[nodiscard]]
+    class_type json_type() const;
+
+    // Functions for getting primitives from the json object.
+    [[nodiscard]]
+    bool is_null() const;
+
+    [[nodiscard]]
+    std::string to_string() const;
     std::string to_string(bool& ok) const;
 
-    [[nodiscard]] double to_float() const;
+    [[nodiscard]]
+    double to_float() const;
     double to_float(bool& ok) const;
 
-    [[nodiscard]] std::int64_t to_int() const;
+    [[nodiscard]]
+    std::int64_t to_int() const;
     std::int64_t to_int(bool& ok) const;
 
-    [[nodiscard]] bool to_bool() const;
+    [[nodiscard]]
+    bool to_bool() const;
     bool to_bool(bool& ok) const;
 
+    [[nodiscard]]
+    auto array_range() const;
     auto array_range();
-    [[nodiscard]] auto array_range() const;
 
     auto object_range();
     [[nodiscard]] auto object_range() const;
 
-    [[nodiscard]] std::string dump(int depth = 1, const std::string& tab = "    ") const;
+    [[nodiscard]]
+    std::string dump(int depth = 1, const std::string& tab = "    ") const;
 
-    friend std::ostream& operator<<(std::ostream& os, const json& value)
-    {
+    friend std::ostream& operator<<(std::ostream& os, const json& value) {
         os << value.dump();
         return os;
     }
 
     template<typename... T>
-    json array(T... args)
-    {
+    json array(T... args) {
         json arr = json::make(json::class_type::array);
         arr.append(args...);
         return std::move(arr);
