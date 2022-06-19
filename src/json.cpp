@@ -4,38 +4,27 @@
 
 using namespace wingmann;
 
-json::backing_data::backing_data(json::float_type value) : json_float{value}
-{
-}
+json::backing_data::backing_data(json::float_type value) : json_float{value} {}
 
-json::backing_data::backing_data(json::int_type value) : json_int{value}
-{
-}
+json::backing_data::backing_data(json::int_type value) : json_int{value} {}
 
-json::backing_data::backing_data(json::bool_type value) : json_bool{value}
-{
-}
+json::backing_data::backing_data(json::bool_type value) : json_bool{value} {}
 
 json::backing_data::backing_data(json::string_type value)
-    : json_string{new string_type{std::move(value)}}
-{
-}
+    : json_string{new string_type{std::move(value)}} {}
 
-json::json(std::initializer_list<json> list) : json{}
-{
+json::json(std::initializer_list<json> list) : json{} {
     set_type(class_type::object);
     for (auto i = list.begin(), e = list.end(); i != e; ++i, ++i)
         operator[](i->to_string()) = *std::next(i);
 }
 
-json::json(json&& other) noexcept : internal_{other.internal_}, type_{other.type_}
-{
+json::json(json&& other) noexcept : internal_{other.internal_}, type_{other.type_} {
     other.type_ = class_type::null;
     other.internal_.json_map = nullptr;
 }
 
-json::json(const json& other)
-{
+json::json(const json& other) {
     switch (other.type_) {
     case class_type::object:
         internal_.json_map =
@@ -55,12 +44,9 @@ json::json(const json& other)
     type_ = other.type_;
 }
 
-json::json(std::nullptr_t) : internal_{}, type_{class_type::null}
-{
-}
+json::json(std::nullptr_t) : internal_{}, type_{class_type::null} {}
 
-json::~json()
-{
+json::~json() {
     switch (type_) {
     case class_type::array:
         delete internal_.json_list;
@@ -76,8 +62,7 @@ json::~json()
     }
 }
 
-json& json::operator=(json&& other) noexcept
-{
+json& json::operator=(json&& other) noexcept {
     clear_internal();
 
     internal_ = other.internal_;
@@ -87,8 +72,7 @@ json& json::operator=(json&& other) noexcept
     return *this;
 }
 
-json& json::operator=(const json& other)
-{
+json& json::operator=(const json& other) {
     clear_internal();
 
     switch (other.type_) {
@@ -111,181 +95,144 @@ json& json::operator=(const json& other)
     return *this;
 }
 
-json& json::operator[](const string_type& key)
-{
+json& json::operator[](const string_type& key) {
     set_type(class_type::object);
     return internal_.json_map->operator[](key);
 }
 
-json& json::operator[](unsigned int index)
-{
+json& json::operator[](unsigned int index) {
     set_type(class_type::array);
-    if (index >= internal_.json_list->size())
-        internal_.json_list->resize(index + 1);
+    if (index >= internal_.json_list->size()) internal_.json_list->resize(index + 1);
 
     return internal_.json_list->operator[](index);
 }
 
-json json::make(json::class_type type)
-{
+json json::make(json::class_type type) {
     json ret;
     ret.set_type(type);
     return ret;
 }
 
-json json::load(const string_type& value)
-{
+json json::load(const string_type& value) {
     size_type offset{};
     return std::move(parse_next(value, offset));
 }
 
-json& json::at(const string_type& key)
-{
+json& json::at(const string_type& key) {
     return operator[](key);
 }
 
-const json& json::at(const string_type& key) const
-{
+const json& json::at(const string_type& key) const {
     return internal_.json_map->at(key);
 }
 
-json& json::at(unsigned int index)
-{
+json& json::at(unsigned int index) {
     return operator[](index);
 }
 
-const json& json::at(unsigned int index) const
-{
+const json& json::at(unsigned int index) const {
     return internal_.json_list->at(index);
 }
 
-json::size_type json::length() const
-{
-    return (type_ == class_type::array)
-        ? internal_.json_list->size()
-        : std::numeric_limits<size_type>::max();
+json::size_type json::length() const {
+    return (type_ == class_type::array) ? internal_.json_list->size()
+                                        : std::numeric_limits<size_type>::max();
 }
 
-bool json::has_key(const string_type& key) const
-{
+bool json::has_key(const string_type& key) const {
     return (type_ == class_type::object) &&
-           (internal_.json_map->find(key) != internal_.json_map->end());
+        (internal_.json_map->find(key) != internal_.json_map->end());
 }
 
-json::size_type json::size() const
-{
+json::size_type json::size() const {
     switch (type_) {
-    case class_type::object: return internal_.json_map->size();
-    case class_type::array:  return internal_.json_list->size();
+    case class_type::object:
+        return internal_.json_map->size();
+    case class_type::array:
+        return internal_.json_list->size();
     default:
         return std::numeric_limits<size_type>::max();
     }
 }
 
-json::class_type json::json_type() const
-{
+json::class_type json::json_type() const {
     return type_;
 }
 
-bool json::is_null() const
-{
+bool json::is_null() const {
     return type_ == class_type::null;
 }
 
-json::string_type json::to_string() const
-{
+json::string_type json::to_string() const {
     bool b;
     return std::move(to_string(b));
 }
 
-json::string_type json::to_string(bool& ok) const
-{
-    return (ok = type_ == class_type::string)
-        ? std::move(json_escape(*internal_.json_string))
-        : string_type{};
+json::string_type json::to_string(bool& ok) const {
+    return (ok = type_ == class_type::string) ? std::move(json_escape(*internal_.json_string))
+                                              : string_type{};
 }
 
-double json::to_float() const
-{
+double json::to_float() const {
     bool b;
     return to_float(b);
 }
 
-double json::to_float(bool& ok) const
-{
-    return (ok = type_ == class_type::floating)
-        ? internal_.json_float
-        : double{};
+double json::to_float(bool& ok) const {
+    return (ok = type_ == class_type::floating) ? internal_.json_float : double{};
 }
 
-json::int_type json::to_int() const
-{
+json::int_type json::to_int() const {
     bool b;
     return to_int(b);
 }
 
-json::int_type json::to_int(bool& ok) const
-{
-    return (ok = type_ == class_type::integral)
-        ? internal_.json_int
-        : int_type{};
+json::int_type json::to_int(bool& ok) const {
+    return (ok = type_ == class_type::integral) ? internal_.json_int : int_type{};
 }
 
-bool json::to_bool() const
-{
+bool json::to_bool() const {
     bool b;
     return to_bool(b);
 }
 
-bool json::to_bool(bool& ok) const
-{
+bool json::to_bool(bool& ok) const {
     return (ok = type_ == class_type::boolean) && internal_.json_bool;
 }
 
-auto json::array_range()
-{
-    return (type_ == class_type::array)
-        ? json_list_wraper_type{internal_.json_list}
-        : json_list_wraper_type{nullptr};
+auto json::array_range() {
+    return (type_ == class_type::array) ? json_list_wraper_type{internal_.json_list}
+                                        : json_list_wraper_type{nullptr};
 }
 
-auto json::array_range() const
-{
-    return (type_ == class_type::array)
-        ? json_const_list_wraper_type{internal_.json_list}
-        : json_const_list_wraper_type{nullptr};
+auto json::array_range() const {
+    return (type_ == class_type::array) ? json_const_list_wraper_type{internal_.json_list}
+                                        : json_const_list_wraper_type{nullptr};
 }
 
-auto json::object_range()
-{
-    return (type_ == class_type::object)
-        ? json_map_wraper_type{internal_.json_map}
-        : json_map_wraper_type{nullptr};
+auto json::object_range() {
+    return (type_ == class_type::object) ? json_map_wraper_type{internal_.json_map}
+                                         : json_map_wraper_type{nullptr};
 }
 
-auto json::object_range() const
-{
-    return (type_ == class_type::array)
-        ? json_const_map_wraper_type{internal_.json_map}
-        : json_const_map_wraper_type{nullptr};
+auto json::object_range() const {
+    return (type_ == class_type::array) ? json_const_map_wraper_type{internal_.json_map}
+                                        : json_const_map_wraper_type{nullptr};
 }
 
-json::string_type json::dump(int depth, const string_type& tab) const
-{
+json::string_type json::dump(int depth, const string_type& tab) const {
     string_type pad;
-    for (int i = 0; i < depth; ++i, pad += tab) { }
+    for (int i = 0; i < depth; ++i, pad += tab) {}
 
     switch (type_) {
     case class_type::null:
         return "null";
-    case class_type::object:
-    {
+    case class_type::object: {
         string_type s{"{\n"};
         bool skip{true};
 
         for (auto& p : *internal_.json_map) {
-            if (!skip)
-                s += ",\n";
+            if (!skip) s += ",\n";
 
             s += (pad + "\"" + p.first + "\" : " + p.second.dump(depth + 1, tab));
             skip = false;
@@ -293,14 +240,12 @@ json::string_type json::dump(int depth, const string_type& tab) const
         s += ("\n" + pad.erase(0, 2) + "}");
         return s;
     }
-    case class_type::array:
-    {
+    case class_type::array: {
         string_type s{"["};
         bool skip{true};
 
         for (auto& p : *internal_.json_list) {
-            if (!skip)
-                s += ", ";
+            if (!skip) s += ", ";
 
             s += p.dump(depth + 1, tab);
             skip = false;
@@ -308,60 +253,78 @@ json::string_type json::dump(int depth, const string_type& tab) const
         s += "]";
         return s;
     }
-    case class_type::string:   return "\"" + json_escape(*internal_.json_string) + "\"";
-    case class_type::floating: return std::to_string(internal_.json_float);
-    case class_type::integral: return std::to_string(internal_.json_int);
-    case class_type::boolean:  return internal_.json_bool ? "true" : "false";
+    case class_type::string:
+        return "\"" + json_escape(*internal_.json_string) + "\"";
+    case class_type::floating:
+        return std::to_string(internal_.json_float);
+    case class_type::integral:
+        return std::to_string(internal_.json_int);
+    case class_type::boolean:
+        return internal_.json_bool ? "true" : "false";
     default:
         return {};
     }
 }
 
-json json::array()
-{
+json json::array() {
     return std::move(json::make(json::class_type::array));
 }
 
-json json::object()
-{
+json json::object() {
     return std::move(json::make(json::class_type::object));
 }
 
-void json::set_type(json::class_type type)
-{
+void json::set_type(json::class_type type) {
     if (type == type_) return;
     clear_internal();
 
     switch (type) {
-    case class_type::null:     internal_.json_map    = nullptr;           break;
-    case class_type::object:   internal_.json_map    = new map_type{};    break;
-    case class_type::array:    internal_.json_list   = new list_type{};   break;
-    case class_type::string:   internal_.json_string = new string_type{}; break;
-    case class_type::floating: internal_.json_float  = double{};          break;
-    case class_type::integral: internal_.json_int    = int_type{};        break;
-    case class_type::boolean:  internal_.json_bool   = false;             break;
+    case class_type::null:
+        internal_.json_map = nullptr;
+        break;
+    case class_type::object:
+        internal_.json_map = new map_type{};
+        break;
+    case class_type::array:
+        internal_.json_list = new list_type{};
+        break;
+    case class_type::string:
+        internal_.json_string = new string_type{};
+        break;
+    case class_type::floating:
+        internal_.json_float = double{};
+        break;
+    case class_type::integral:
+        internal_.json_int = int_type{};
+        break;
+    case class_type::boolean:
+        internal_.json_bool = false;
+        break;
     }
     type_ = type;
 }
 
-void json::clear_internal()
-{
+void json::clear_internal() {
     switch (type_) {
-    case class_type::object: delete internal_.json_map;    break;
-    case class_type::array:  delete internal_.json_list;   break;
-    case class_type::string: delete internal_.json_string; break;
+    case class_type::object:
+        delete internal_.json_map;
+        break;
+    case class_type::array:
+        delete internal_.json_list;
+        break;
+    case class_type::string:
+        delete internal_.json_string;
+        break;
     default:
         break;
     }
 }
 
-void json::consume_ws(const string_type& str, size_type& offset)
-{
+void json::consume_ws(const string_type& str, size_type& offset) {
     while (isspace(str[offset])) ++offset;
 }
 
-json json::parse_next(const string_type& str, size_type& offset)
-{
+json json::parse_next(const string_type& str, size_type& offset) {
     char value;
     consume_ws(str, offset);
     value = str[offset];
@@ -387,8 +350,7 @@ json json::parse_next(const string_type& str, size_type& offset)
     return {};
 }
 
-json json::parse_object(const string_type& str, size_type& offset)
-{
+json json::parse_object(const string_type& str, size_type& offset) {
     auto json_object = json::make(json::class_type::object);
 
     ++offset;
@@ -415,12 +377,10 @@ json json::parse_object(const string_type& str, size_type& offset)
         if (str[offset] == ',') {
             ++offset;
             continue;
-        }
-        else if (str[offset] == '}') {
+        } else if (str[offset] == '}') {
             ++offset;
             break;
-        }
-        else {
+        } else {
             std::cerr << "ERROR: Object: Expected comma, found '" << str[offset] << "'\n";
             break;
         }
@@ -428,8 +388,7 @@ json json::parse_object(const string_type& str, size_type& offset)
     return std::move(json_object);
 }
 
-json json::parse_array(const string_type& str, size_type& offset)
-{
+json json::parse_array(const string_type& str, size_type& offset) {
     auto json_array = json::make(json::class_type::array);
     size_type index{};
 
@@ -448,12 +407,10 @@ json json::parse_array(const string_type& str, size_type& offset)
         if (str[offset] == ',') {
             ++offset;
             continue;
-        }
-        else if (str[offset] == ']') {
+        } else if (str[offset] == ']') {
             ++offset;
             break;
-        }
-        else {
+        } else {
             std::cerr << "ERROR: array: Expected ',' or ']', found '" << str[offset] << "'\n";
             return std::move(json::make(json::class_type::array));
         }
@@ -461,36 +418,47 @@ json json::parse_array(const string_type& str, size_type& offset)
     return std::move(json_array);
 }
 
-json json::parse_string(const string_type& str, size_type& offset)
-{
+json json::parse_string(const string_type& str, size_type& offset) {
     json json_string;
     string_type value;
 
     for (char c = str[++offset]; c != '\"'; c = str[++offset]) {
         if (c == '\\') {
             switch (str[++offset]) {
-            case '\"':    value += '\"';    break;
-            case '\\':    value += '\\';    break;
-            case '/':     value += '/';     break;
-            case 'b':     value += '\b';    break;
-            case 'f':     value += '\f';    break;
-            case 'n':     value += '\n';    break;
-            case 'r':     value += '\r';    break;
-            case 't':     value += '\t';    break;
-            case 'u':
-            {
+            case '\"':
+                value += '\"';
+                break;
+            case '\\':
+                value += '\\';
+                break;
+            case '/':
+                value += '/';
+                break;
+            case 'b':
+                value += '\b';
+                break;
+            case 'f':
+                value += '\f';
+                break;
+            case 'n':
+                value += '\n';
+                break;
+            case 'r':
+                value += '\r';
+                break;
+            case 't':
+                value += '\t';
+                break;
+            case 'u': {
                 value += "\\u";
 
                 for (unsigned i = 1; i <= 4; ++i) {
                     c = str[offset + i];
 
-                    if ((c >= '0' && c <= '9') ||
-                       (c >= 'a' && c <= 'f') ||
-                       (c >= 'A' && c <= 'F'))
-                    {
+                    if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
+                        (c >= 'A' && c <= 'F')) {
                         value += c;
-                    }
-                    else {
+                    } else {
                         std::cerr << "ERROR: String: Expected hex character in unicode escape, "
                                   << "found '" << c << "'\n";
                         return std::move(json::make(json::class_type::string));
@@ -503,8 +471,7 @@ json json::parse_string(const string_type& str, size_type& offset)
                 value += '\\';
                 break;
             }
-        }
-        else {
+        } else {
             value += c;
         }
     }
@@ -513,8 +480,7 @@ json json::parse_string(const string_type& str, size_type& offset)
     return std::move(json_string);
 }
 
-json json::parse_number(const string_type& str, size_type& offset)
-{
+json json::parse_number(const string_type& str, size_type& offset) {
     json number;
     string_type value;
     string_type expression_value;
@@ -527,12 +493,10 @@ json json::parse_number(const string_type& str, size_type& offset)
 
         if ((c == '-') || ((c >= '0') && (c <= '9'))) {
             value += c;
-        }
-        else if (c == '.') {
+        } else if (c == '.') {
             value += c;
             is_floating = true;
-        }
-        else {
+        } else {
             break;
         }
     }
@@ -550,18 +514,15 @@ json json::parse_number(const string_type& str, size_type& offset)
 
             if (c >= '0' && c <= '9') {
                 expression_value += c;
-            }
-            else if (!isspace(c) && (c != ',') && (c != ']') && (c != '}')) {
+            } else if (!isspace(c) && (c != ',') && (c != ']') && (c != '}')) {
                 std::cerr << "ERROR: Number: Expected a number for exponent, found '" << c << "'\n";
                 return std::move(json::make(json::class_type::null));
-            }
-            else {
+            } else {
                 break;
             }
         }
         exp = std::stoll(expression_value);
-    }
-    else if (!isspace(c) && (c != ',') && (c != ']') && (c != '}')) {
+    } else if (!isspace(c) && (c != ',') && (c != ']') && (c != '}')) {
         std::cerr << "ERROR: Number: unexpected character '" << c << "'\n";
         return std::move(json::make(json::class_type::null));
     }
@@ -569,8 +530,7 @@ json json::parse_number(const string_type& str, size_type& offset)
 
     if (is_floating) {
         number = std::stod(value) * std::pow(10, exp);
-    }
-    else {
+    } else {
         number = (!expression_value.empty())
             ? static_cast<float_type>(std::stoll(value)) * std::pow(10, exp)
             : static_cast<float_type>(std::stoll(value));
@@ -579,19 +539,16 @@ json json::parse_number(const string_type& str, size_type& offset)
     return std::move(number);
 }
 
-json json::parse_bool(const string_type& str, size_type& offset)
-{
+json json::parse_bool(const string_type& str, size_type& offset) {
     json json_bool;
 
     if (str.substr(offset, 4) == "true") {
         json_bool = true;
-    }
-    else if (str.substr(offset, 5) == "false") {
+    } else if (str.substr(offset, 5) == "false") {
         json_bool = false;
-    }
-    else {
-        std::cerr << "ERROR: Bool: Expected 'true' or 'false', found '"
-                  << str.substr(offset, 5) << "'\n";
+    } else {
+        std::cerr << "ERROR: Bool: Expected 'true' or 'false', found '" << str.substr(offset, 5)
+                  << "'\n";
 
         return std::move(json::make(json::class_type::null));
     }
@@ -599,8 +556,7 @@ json json::parse_bool(const string_type& str, size_type& offset)
     return std::move(json_bool);
 }
 
-json json::parse_null(const string_type& str, size_type& offset)
-{
+json json::parse_null(const string_type& str, size_type& offset) {
     json json_null;
 
     if (str.substr(offset, 4) != "null") {
@@ -611,20 +567,35 @@ json json::parse_null(const string_type& str, size_type& offset)
     return std::move(json_null);
 }
 
-json::string_type json::json_escape(const string_type& value)
-{
+json::string_type json::json_escape(const string_type& value) {
     string_type output;
 
     for (const char& i : value) {
         switch (i) {
-            case '\"': output += "\\\""; break;
-            case '\\': output += "\\\\"; break;
-            case '\b': output += "\\b";  break;
-            case '\f': output += "\\f";  break;
-            case '\n': output += "\\n";  break;
-            case '\r': output += "\\r";  break;
-            case '\t': output += "\\t";  break;
-            default:   output += i;      break;
+        case '\"':
+            output += "\\\"";
+            break;
+        case '\\':
+            output += "\\\\";
+            break;
+        case '\b':
+            output += "\\b";
+            break;
+        case '\f':
+            output += "\\f";
+            break;
+        case '\n':
+            output += "\\n";
+            break;
+        case '\r':
+            output += "\\r";
+            break;
+        case '\t':
+            output += "\\t";
+            break;
+        default:
+            output += i;
+            break;
         }
     }
     return std::move(output);
